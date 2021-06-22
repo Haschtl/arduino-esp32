@@ -48,7 +48,7 @@ env.Append(
     CXXFLAGS=[
         "-march=rv32imc",
         "-std=gnu++11",
-        "-fno-exceptions",
+        "-fexceptions",
         "-fno-rtti"
     ],
 
@@ -64,7 +64,8 @@ env.Append(
         "-Wno-error=format=",
         "-nostartfiles",
         "-Wno-format",
-        "-Og",
+        "-O2",
+        "-fstack-protector",
         "-fstrict-volatile-bitfields",
         "-Wno-error=unused-but-set-variable",
         "-MMD"
@@ -80,40 +81,12 @@ env.Append(
         "-fno-lto",
         "-Wl,--wrap=mbedtls_mpi_exp_mod",
         "-Wl,--undefined=uxTopUsedPriority",
-        "-Wl,--wrap=_Unwind_SetEnableExceptionFdeSorting",
-        "-Wl,--wrap=__register_frame_info_bases",
-        "-Wl,--wrap=__register_frame_info",
-        "-Wl,--wrap=__register_frame",
-        "-Wl,--wrap=__register_frame_info_table_bases",
-        "-Wl,--wrap=__register_frame_info_table",
-        "-Wl,--wrap=__register_frame_table",
-        "-Wl,--wrap=__deregister_frame_info_bases",
-        "-Wl,--wrap=__deregister_frame_info",
-        "-Wl,--wrap=_Unwind_Find_FDE",
-        "-Wl,--wrap=_Unwind_GetGR",
-        "-Wl,--wrap=_Unwind_GetCFA",
-        "-Wl,--wrap=_Unwind_GetIP",
-        "-Wl,--wrap=_Unwind_GetIPInfo",
-        "-Wl,--wrap=_Unwind_GetRegionStart",
-        "-Wl,--wrap=_Unwind_GetDataRelBase",
-        "-Wl,--wrap=_Unwind_GetTextRelBase",
-        "-Wl,--wrap=_Unwind_SetIP",
-        "-Wl,--wrap=_Unwind_SetGR",
-        "-Wl,--wrap=_Unwind_GetLanguageSpecificData",
-        "-Wl,--wrap=_Unwind_FindEnclosingFunction",
-        "-Wl,--wrap=_Unwind_Resume",
-        "-Wl,--wrap=_Unwind_RaiseException",
-        "-Wl,--wrap=_Unwind_DeleteException",
-        "-Wl,--wrap=_Unwind_ForcedUnwind",
-        "-Wl,--wrap=_Unwind_Resume_or_Rethrow",
-        "-Wl,--wrap=_Unwind_Backtrace",
-        "-Wl,--wrap=__cxa_call_unexpected",
-        "-Wl,--wrap=__gxx_personality_v0",
         "-T", "esp32c3.rom.ld",
         "-T", "esp32c3.rom.api.ld",
         "-T", "esp32c3.rom.libgcc.ld",
         "-T", "esp32c3.rom.newlib.ld",
         "-T", "esp32c3.rom.version.ld",
+        "-T", "esp32c3.rom.eco3.ld",
         "-T", "esp32c3_out.ld",
         "-T", "esp32c3.project.ld",
         "-T", "esp32c3.peripherals.ld",
@@ -130,7 +103,6 @@ env.Append(
         "-u", "newlib_include_syscalls_impl",
         "-u", "newlib_include_pthread_impl",
         "-u", "__cxa_guard_dummy",
-        "-u", "__cxx_fatal_exception",
         '-Wl,-Map="%s"' % join("$BUILD_DIR", basename(env.subst("${PROJECT_DIR}.map")))
     ],
 
@@ -198,9 +170,6 @@ env.Append(
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "app_trace", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "asio", "asio", "asio", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "asio", "port", "include"),
-        join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "bt", "common", "osi", "include"),
-        join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "bt", "include", "esp32c3", "include"),
-        join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "bt", "host", "bluedroid", "api", "include", "api"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "cbor", "port", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "unity", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "unity", "unity", "src"),
@@ -220,7 +189,6 @@ env.Append(
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "esp_http_client", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "esp_http_server", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "esp_https_ota", "include"),
-        join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "esp_https_server", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "esp_lcd", "include"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "esp_lcd", "interface"),
         join(FRAMEWORK_DIR, "tools", "sdk", "esp32c3", "include", "protobuf-c", "protobuf-c"),
@@ -261,7 +229,7 @@ env.Append(
     ],
 
     LIBS=[
-        "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lasio", "-lbt", "-lcbor", "-lunity", "-lcmock", "-lcoap", "-lconsole", "-lnghttp", "-lesp-tls", "-lesp_adc_cal", "-lesp_hid", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lesp_https_server", "-lesp_lcd", "-lprotobuf-c", "-lprotocomm", "-lmdns", "-lesp_local_ctrl", "-lsdmmc", "-lesp_serial_slave_link", "-lesp_websocket_client", "-lexpat", "-lwear_levelling", "-lfatfs", "-lfreemodbus", "-ljsmn", "-ljson", "-llibsodium", "-lmqtt", "-lopenssl", "-lspiffs", "-lwifi_provisioning", "-lesp_littlefs", "-lfb_gfx", "-lasio", "-lcbor", "-lcmock", "-lunity", "-lcoap", "-lesp_hid", "-lesp_lcd", "-lesp_local_ctrl", "-lesp_https_server", "-lesp_websocket_client", "-lexpat", "-lfreemodbus", "-ljsmn", "-llibsodium", "-lmqtt", "-lesp_littlefs", "-lfb_gfx", "-lesp_adc_cal", "-lfatfs", "-lwear_levelling", "-lopenssl", "-lspiffs", "-lwifi_provisioning", "-lprotocomm", "-lbt", "-lbtdm_app", "-lprotobuf-c", "-lmdns", "-lconsole", "-ljson", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lphy", "-lesp_phy", "-lphy", "-lesp_phy", "-lphy", "-lbtbb", "-lm", "-lnewlib", "-lstdc++", "-lpthread", "-lgcc", "-lcxx", "-lapp_trace", "-lgcov", "-lapp_trace", "-lgcov", "-lc"
+        "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lasio", "-lcbor", "-lunity", "-lcmock", "-lcoap", "-lconsole", "-lnghttp", "-lesp-tls", "-lesp_adc_cal", "-lesp_hid", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lesp_lcd", "-lprotobuf-c", "-lprotocomm", "-lmdns", "-lesp_local_ctrl", "-lsdmmc", "-lesp_serial_slave_link", "-lesp_websocket_client", "-lexpat", "-lwear_levelling", "-lfatfs", "-lfreemodbus", "-ljsmn", "-ljson", "-llibsodium", "-lmqtt", "-lopenssl", "-lspiffs", "-lwifi_provisioning", "-lesp_littlefs", "-lfb_gfx", "-lasio", "-lcbor", "-lcmock", "-lunity", "-lcoap", "-lesp_hid", "-lesp_lcd", "-lesp_local_ctrl", "-lesp_websocket_client", "-lexpat", "-lfreemodbus", "-ljsmn", "-llibsodium", "-lmqtt", "-lesp_littlefs", "-lfb_gfx", "-lesp_adc_cal", "-lfatfs", "-lwear_levelling", "-lopenssl", "-lspiffs", "-lwifi_provisioning", "-lprotocomm", "-lprotobuf-c", "-lmdns", "-lconsole", "-ljson", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lmbedtls", "-lefuse", "-lapp_update", "-lbootloader_support", "-lesp_ipc", "-lspi_flash", "-lnvs_flash", "-lpthread", "-lesp_gdbstub", "-lespcoredump", "-lesp_phy", "-lesp_system", "-lesp_rom", "-lhal", "-lvfs", "-lesp_eth", "-ltcpip_adapter", "-lesp_netif", "-lesp_event", "-lwpa_supplicant", "-lesp_wifi", "-llwip", "-llog", "-lheap", "-lsoc", "-lesp_hw_support", "-lesp_pm", "-lesp_ringbuf", "-ldriver", "-lriscv", "-lesp32c3", "-lesp_common", "-lesp_timer", "-lfreertos", "-lnewlib", "-lcxx", "-lapp_trace", "-lnghttp", "-lesp-tls", "-ltcp_transport", "-lesp_http_client", "-lesp_http_server", "-lesp_https_ota", "-lsdmmc", "-lesp_serial_slave_link", "-lmbedtls", "-lmbedcrypto", "-lmbedx509", "-lcoexist", "-lcore", "-lespnow", "-lmesh", "-lnet80211", "-lpp", "-lsmartconfig", "-lwapi", "-lphy", "-lesp_phy", "-lphy", "-lesp_phy", "-lphy", "-lbtbb", "-lm", "-lnewlib", "-lstdc++", "-lpthread", "-lgcc", "-lcxx", "-lapp_trace", "-lgcov", "-lapp_trace", "-lgcov", "-lc"
     ],
 
     CPPDEFINES=[
